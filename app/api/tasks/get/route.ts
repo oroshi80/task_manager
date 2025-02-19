@@ -1,21 +1,16 @@
-import { NextResponse } from "next/server";
-import redis from "@/lib/redis"; // Assuming you have a Redis helper
+// app/api/tasks/get/route.ts
+import { NextResponse } from 'next/server';
+import db from '@/lib/mysql';
 
 export async function GET() {
+    const query = 'SELECT * FROM tasks';
 
-    try {
-        const tasks = await redis.lrange("tasks", 0, -1); // Fetch tasks from Redis
-        const parsedTasks = tasks.map((task) => JSON.parse(task as string)); // Parse the task data
-
-        // Return the tasks as JSON response
-        return NextResponse.json(parsedTasks, { status: 200 });
-    } catch (error) {
-        console.error(error);
-
-        // Return error response if something went wrong
-        return NextResponse.json(
-            { error: "Failed to fetch tasks." },
-            { status: 500 }
-        );
-    }
+    return new Promise((resolve) => {
+        db.query(query, (err, rows) => {
+            if (err) {
+                return resolve(NextResponse.json({ error: 'Failed to fetch tasks' }, { status: 500 }));
+            }
+            return resolve(NextResponse.json(rows, { status: 200 }));
+        });
+    });
 }

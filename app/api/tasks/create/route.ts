@@ -1,42 +1,42 @@
+import db from "@/lib/mysql";
 import { NextRequest, NextResponse } from "next/server";
-import redis from "@/lib/redis"; // Assuming you have a Redis helper
-
-interface Task {
-    id: string;
-    title: string;
-    description: string;
-    status: string;
-}
 
 export async function POST(req: NextRequest) {
     try {
-        const { title, description, status }: Task = await req.json(); // parse the request body
+        const body = await req.json();
+        const { title, description } = body;
 
-        // Validate data
-        if (!title || !description || !status) {
+        if (!title || !description) {
             return NextResponse.json(
-                { error: "Title, description, and status are required." },
+                { error: "Title and description are required." },
                 { status: 400 }
             );
         }
 
-        // Generate a unique ID for the new task
-        const newTask: Task = {
-            id: new Date().toISOString(), // You can also use a UUID generator here
-            title,
-            description,
-            status,
-        };
+        const query = "INSERT INTO tasks (title, description, status) VALUES (?, ?, ?)";
+        const values = [title, description, "to-do"];
 
-        // Save the task to Redis (or your preferred storage solution)
-        await redis.rpush("tasks", JSON.stringify(newTask));
+        return new Promise((resolve) => {
+            db.query(query, values, (err, result) => {
+                if (err) {
+                    console.error("MySQL Insert Error:", err);
+                    return resolve(
+                        NextResponse.json({ error: "Failed to create task" }, { status: 500 })
+                    );
+                }
 
-        // Return success response with the created task
-        return NextResponse.json(newTask, { status: 201 });
+                return resolve(
+                    NextResponse.json(
+                        { id: result.insertId, title, description, status: "to-do" }, // MySQL auto-generates ID
+                        { status: 201 }
+                    )
+                );
+            });
+        });
     } catch (error) {
-        console.error(error);
+        console.error("Unexpected Error:", error);
         return NextResponse.json(
-            { error: "Something went wrong while creating the task." },
+            { error: "Internal Server Error" },
             { status: 500 }
         );
     }

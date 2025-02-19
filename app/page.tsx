@@ -1,22 +1,37 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@heroui/react";
-import { FaPlus } from "react-icons/fa"; // Assuming you're using react-icons
+import { FaPlus } from "react-icons/fa";
 import AddTask from "@/components/AddTaskModal";
 import Board from "@/components/Board";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Home() {
-  const [tasks, setTasks] = useState<string[]>([]);
+  const [tasks, setTasks] = useState<unknown[]>([]); // Task state initialized properly
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Fetch tasks when the component mounts or when a new task is added
+  const fetchTasks = async () => {
+    try {
+      const response = await fetch("/api/tasks/get");
+      const data = await response.json();
+      setTasks(data); // Update state with the new list of tasks
+    } catch (error) {
+      toast.error("❌ Error fetching tasks. Please try again.");
+    }
+  };
+
+  // Fetch tasks on component mount
+  useEffect(() => {
+    fetchTasks();
+  }, []); // Fetch tasks once on component mount
 
   const handleAddTask = async (data: {
     title: string;
     description: string;
   }) => {
     try {
-      // Show loading toast
       toast
         .promise(
           fetch("/api/tasks/create", {
@@ -25,10 +40,9 @@ export default function Home() {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              id: Date.now().toString(), // Unique ID generation
               title: data.title,
               description: data.description,
-              status: "To Do", // Default status
+              status: "to-do",
             }),
           }).then((response) => {
             if (!response.ok) {
@@ -37,20 +51,16 @@ export default function Home() {
             return response.json();
           }),
           {
-            pending: "Creating task...", // Message while waiting for the API
-            success: "Task added successfully! 🎉", // Message on success
-            error: "Error adding task. Please try again. ❌", // Message on error
+            pending: "Creating task...",
+            success: "Task added successfully! 🎉",
+            error: "Error adding task. Please try again. ❌",
           }
         )
-        .then((newTask) => {
-          // Update the tasks state if the task creation was successful
-          setTasks([...tasks, newTask]);
+        .then(() => {
+          fetchTasks(); // Fetch tasks after adding a new one to update state
         });
     } catch (error) {
-      // If something goes wrong outside of fetch (unlikely but safe to catch)
-      toast.error(
-        `❌ Something went wrong. Please try again. error:  ${error}`
-      );
+      toast.error(`❌ Something went wrong. ${error}`);
     }
   };
 
@@ -67,7 +77,8 @@ export default function Home() {
       </div>
 
       <main className="flex justify-center items-center">
-        <Board tasks={tasks} />
+        <Board tasks={tasks} fetchTasks={fetchTasks} />{" "}
+        {/* Pass fetchTasks to Board */}
       </main>
 
       <AddTask

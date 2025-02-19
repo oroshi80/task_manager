@@ -1,35 +1,25 @@
+// In your `api/tasks/update/[id].ts`
 import { NextApiRequest, NextApiResponse } from "next";
 import redis from "@/lib/redis";
 
-interface Task {
-    id: string;
-    title: string;
-    description: string;
-    status: string;
-}
-
 export async function PUT(req: NextApiRequest, res: NextApiResponse) {
-    const { id, title, description, status }: Task = req.body;
+    const { id } = req.query;
+    const { title, description, status } = req.body;
 
-    if (!id || !title || !description || !status) {
-        return res.status(400).json({ error: "All fields (id, title, description, and status) are required." });
+    if (!title || !description || !status) {
+        return res.status(400).json({ error: "Title, description, and status are required." });
     }
 
-    // Retrieve the task from Redis by ID
+    const updatedTask = { id, title, description, status };
+
+    // Find and update the task in Redis
     const tasks = await redis.lrange("tasks", 0, -1);
     const taskIndex = tasks.findIndex((task) => JSON.parse(task as string).id === id);
 
-    if (taskIndex === -1) {
-        return res.status(404).json({ error: "Task not found" });
+    if (taskIndex !== -1) {
+        await redis.lset("tasks", taskIndex, JSON.stringify(updatedTask));
+        return res.status(200).json(updatedTask);
     }
 
-    // Update the task
-    const updatedTask = { id, title, description, status };
-    tasks[taskIndex] = JSON.stringify(updatedTask);
-
-    // Save updated task list back to Redis
-    await redis.del("tasks");
-    await redis.rpush("tasks", ...tasks);
-
-    return res.status(200).json(updatedTask);
+    return res.status(404).json({ error: "Task not found." });
 }

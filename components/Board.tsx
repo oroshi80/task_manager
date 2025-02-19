@@ -1,97 +1,111 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import {
-  DndContext,
-  DragEndEvent,
-  useDragOver,
-  useDraggable,
-} from "@dnd-kit/core";
+import React, { useState } from "react";
+import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import Column from "./Column";
 import { toast } from "react-toastify";
+import ConfirmDeleteModal from "@/components/ConfirmDeleteModal";
 
 interface Task {
   id: string;
   title: string;
   description: string;
-  status: "todo" | "in-progress" | "done";
+  status: "to-do" | "in-progress" | "done";
 }
 
-export default function Board() {
-  const [tasks, setTasks] = useState<Task[]>([]);
+interface BoardProps {
+  tasks: Task[]; // Accept tasks as a prop
+  fetchTasks: () => void; // Accept fetchTasks as a prop
+}
 
-  // Fetch tasks from the API
-  useEffect(() => {
-    fetch("/api/tasks/get/")
-      .then((res) => res.json())
-      .then((data) => setTasks(data));
-  }, []);
+export default function Board({ tasks, fetchTasks }: BoardProps) {
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
+  const [taskToDeleteTitle, setTaskToDeleteTitle] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Handle task movement between columns
-  const handleTaskMove = async (
-    taskId: string,
-    targetStatus: "todo" | "in-progress" | "done"
-  ) => {
-    const updatedTasks = tasks.map((task) =>
-      task.id === taskId ? { ...task, status: targetStatus } : task
-    );
-
-    // Update local state
-    setTasks(updatedTasks);
-
-    // Persist the changes to the API
-    const task = updatedTasks.find((task) => task.id === taskId);
-    if (task) {
-      try {
-        const response = await fetch(`/api/tasks/update/${taskId}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(task),
-        });
-        if (!response.ok) {
-          throw new Error("Failed to update task status.");
-        }
-      } catch (error) {
-        toast.error(`❌ ${error.message}`);
-      }
-    }
+  // Handle deleting task logic
+  const handleDeleteClick = (id: string, title: string): Promise<void> => {
+    return new Promise((resolve) => {
+      setTaskToDelete(id);
+      setTaskToDeleteTitle(title);
+      setIsModalOpen(true);
+      resolve();
+    });
   };
 
-  // Handle drag and drop end event
+  // Confirm and delete the task from the database
+  const handleConfirmDelete = async () => {
+    if (!taskToDelete) return;
+
+    setIsLoading(true);
+
+    try {
+      await toast.promise(
+        fetch(`/api/tasks/delete/${taskToDelete}`, {
+          method: "DELETE",
+        }).then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to delete task.");
+          }
+          return response.json();
+        }),
+        {
+          pending: "Deleting task...",
+          success: "✅ Task deleted!",
+          error: "❌ Error deleting task. Please try again.",
+        }
+      );
+
+      fetchTasks(); // Refresh task list after deletion
+    } catch (error) {
+      toast.error(`❌ ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+
+    setIsModalOpen(false);
+    setTaskToDelete(null);
+  };
+
+  // Drag and drop functionality
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-
     if (over) {
-      // Identify the target column and move the task
-      const targetColumn = over.id as "todo" | "in-progress" | "done";
-      handleTaskMove(active.id as string, targetColumn);
+      const targetColumn = over.id as "to-do" | "in-progress" | "done";
+      handleTaskMove(active.id as string, targetColumn); // Move task to the target column
     }
   };
 
   return (
-    <div className="flex gap-4 p-4">
-      <DndContext onDragEnd={handleDragEnd}>
-        <Column
-          id="todo"
-          title="To Do"
-          tasks={tasks.filter((task) => task.status === "todo")}
-          onTaskMove={handleTaskMove}
-        />
-        <Column
-          id="in-progress"
-          title="In Progress"
-          tasks={tasks.filter((task) => task.status === "in-progress")}
-          onTaskMove={handleTaskMove}
-        />
-        <Column
-          id="done"
-          title="Done"
-          tasks={tasks.filter((task) => task.status === "done")}
-          onTaskMove={handleTaskMove}
-        />
-      </DndContext>
-    </div>
+    <>
+      <div className="flex gap-4 p-4">
+        <DndContext onDragEnd={handleDragEnd}>
+          <Column
+            title="To Do"
+            tasks={tasks.filter((task) => task.status === "to-do")}
+            onDelete={handleDeleteClick}
+          />
+          <Column
+            title="In Progress"
+            tasks={tasks.filter((task) => task.status === "in-progress")}
+            onDelete={handleDeleteClick}
+          />
+          <Column
+            title="Done"
+            tasks={tasks.filter((task) => task.status === "done")}
+            onDelete={handleDeleteClick}
+          />
+        </DndContext>
+      </div>
+
+      <ConfirmDeleteModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title={taskToDeleteTitle}
+        isLoading={isLoading}
+      />
+    </>
   );
 }
