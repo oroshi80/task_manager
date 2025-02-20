@@ -44,7 +44,7 @@ export default function Nav() {
       </NavbarContent>
 
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
-        <NavbarItem>
+        {/* <NavbarItem>
           <Link color="foreground" href="#">
             Features
           </Link>
@@ -58,23 +58,23 @@ export default function Nav() {
           <Link color="foreground" href="#">
             Integrations
           </Link>
-        </NavbarItem>
+        </NavbarItem> */}
       </NavbarContent>
       <NavbarContent justify="end">
         <NavbarItem className="hidden lg:flex">
-          <Link href="#">Login</Link>
+          {/* <Link href="#">Login</Link> */}
         </NavbarItem>
         <NavbarItem>
           <div className="flex gap-2">
-            <Button as={Link} color="primary" href="#" variant="flat">
+            {/* <Button as={Link} color="primary" href="#" variant="flat">
               Sign Up
-            </Button>
+            </Button> */}
             <ThemeSwitcher />
           </div>
         </NavbarItem>
       </NavbarContent>
       <NavbarMenu>
-        {menuItems.map((item, index) => (
+        {/* {menuItems.map((item, index) => (
           <NavbarMenuItem key={`${item}-${index}`}>
             <Link
               className="w-full"
@@ -91,7 +91,7 @@ export default function Nav() {
               {item}
             </Link>
           </NavbarMenuItem>
-        ))}
+        ))} */}
       </NavbarMenu>
     </Navbar>
   );

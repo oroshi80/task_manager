@@ -1,5 +1,6 @@
 import db from "@/lib/mysql";
 import { NextRequest, NextResponse } from "next/server";
+import { ResultSetHeader } from "mysql2"; // Import the correct type from the MySQL library
 
 export async function POST(req: NextRequest) {
     try {
@@ -25,9 +26,12 @@ export async function POST(req: NextRequest) {
                     );
                 }
 
+                // Use type assertion to tell TypeScript the result contains insertId
+                const resultSet = result as ResultSetHeader;
+
                 return resolve(
                     NextResponse.json(
-                        { id: result.insertId, title, description, status: "to-do" }, // MySQL auto-generates ID
+                        { id: resultSet.insertId, title, description, status: "to-do" }, // MySQL auto-generates ID
                         { status: 201 }
                     )
                 );

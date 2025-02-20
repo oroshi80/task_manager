@@ -59,7 +59,7 @@ export default function ThemeSwitcher() {
         defaultSelected
         checked={theme === "dark"} // Checks if the theme is dark
         onChange={() => setTheme(theme === "dark" ? "light" : "dark")} // Toggles theme
-        color="success"
+        color="primary"
         size="lg"
         thumbIcon={({ isSelected, className }) =>
           isSelected ? (

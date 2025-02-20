@@ -7,8 +7,15 @@ import Board from "@/components/Board";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+interface Tasks {
+  id: number;
+  title: string;
+  description: string;
+  status: "to-do" | "in-progress" | "done";
+}
+
 export default function Home() {
-  const [tasks, setTasks] = useState<unknown[]>([]); // Task state initialized properly
+  const [tasks, setTasks] = useState<Tasks[]>([]); // Task state initialized properly
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Fetch tasks when the component mounts or when a new task is added
@@ -17,6 +24,7 @@ export default function Home() {
       const response = await fetch("/api/tasks/get");
       const data = await response.json();
       setTasks(data); // Update state with the new list of tasks
+      console.log("Tasks Data: ", data);
     } catch (error) {
       toast.error("❌ Error fetching tasks. Please try again.");
     }
