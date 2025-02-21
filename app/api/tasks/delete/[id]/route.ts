@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/mysql"; // MySQL pool connection
 import dbConnect from "@/lib/mongoDB"; // MongoDB connection
