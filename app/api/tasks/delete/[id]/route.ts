@@ -7,13 +7,8 @@ interface QueryResult {
     affectedRows: number;
 }
 
-// Define the type for the params in dynamic routes
-type Params = {
-    id: string; // id is always a string in dynamic routes
-};
-
-export async function DELETE(req: NextRequest, { params }: { params: Params }) {
-    const { id } = params; // Destructure params directly
+export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
+    const { id } = context.params; // Access id directly from context.params
 
     const databaseType = process.env.DATABASE; // Get the database type from .env
 
