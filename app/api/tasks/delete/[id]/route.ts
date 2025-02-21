@@ -8,8 +8,8 @@ interface QueryResult {
 }
 
 export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
-    // Await params before destructuring
-    const { id } = await context.params;
+    // Await params before accessing its properties
+    const { id } = await context.params;  // Now we await context.params
 
     const databaseType = process.env.DATABASE; // Get the database type from .env
 
