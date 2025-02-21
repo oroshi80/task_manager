@@ -4,17 +4,17 @@ import { useDroppable } from "@dnd-kit/core";
 import Task from "./Task";
 
 interface ColumnProps {
-  id: string;
+  id: number | string;
   title: string;
   tasks: {
-    id: number;
+    id: number | string;
     title: string;
     description: string;
     status: "to-do" | "in-progress" | "done";
   }[];
-  onDelete?: (id: number, title: string) => Promise<void>;
+  onDelete?: (id: number | string, title: string) => Promise<void>;
   onEdit?: (
-    id: number,
+    id: number | string,
     title: string,
     description: string,
     status: "to-do" | "in-progress" | "done"

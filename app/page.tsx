@@ -26,7 +26,7 @@ export default function Home() {
       setTasks(data); // Update state with the new list of tasks
       console.log("Tasks Data: ", data);
     } catch (error) {
-      toast.error("❌ Error fetching tasks. Please try again.");
+      toast.error(`❌ Error fetching tasks. Please try again. Error: ${error}`);
     }
   };
 
@@ -83,7 +83,6 @@ export default function Home() {
           Add Task
         </Button>
       </div>
-
       <main className="flex justify-center items-center">
         <Board tasks={tasks} fetchTasks={fetchTasks} />{" "}
         {/* Pass fetchTasks to Board */}

@@ -1,8 +1,13 @@
-import { NextResponse } from "next/server";
-import db from "@/lib/mysql";
+import { NextRequest, NextResponse } from "next/server";
+import db from "@/lib/mysql"; // MySQL pool connection
+import dbConnect from "@/lib/mongoDB"; // MongoDB connection
+import { ObjectId } from "mongodb"; // Import ObjectId from mongodb
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-    const { id } = params;
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+    // Wait for params to be resolved
+    req;
+    const { id } = await params; // Await params before destructuring
+    const databaseType = process.env.DATABASE; // Get the database type from .env
 
     // Validate if ID is provided
     if (!id) {
@@ -10,13 +15,42 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     }
 
     try {
-        // Execute query to delete task
-        db.query("DELETE FROM tasks WHERE id = ?", [id]);
+        if (databaseType === "mongoDB") {
+            // MongoDB query
+            const { db: mdb } = await dbConnect(); // Connect to MongoDB
 
-        // Return success response
-        return NextResponse.json({ message: "Task deleted successfully" }, { status: 200 });
+            // Delete task from MongoDB
+            const result = await mdb.collection("tasks").deleteOne({ _id: new ObjectId(id) });
+
+            if (result.deletedCount === 0) {
+                return NextResponse.json({ error: "Task not found" }, { status: 404 });
+            }
+
+            // Return success response
+            return NextResponse.json({ message: "Task deleted successfully" }, { status: 200 });
+        } else if (databaseType === "MySQL") {
+            // MySQL query using connection pool
+            const query = "DELETE FROM tasks WHERE id = ?";
+            const values = [id];
+
+            // Execute the query using the connection pool
+            const [result] = await db.execute(query, values); // Destructure the result
+
+            // Check affectedRows in the result
+            if ((result as any).affectedRows === 0) {
+                return NextResponse.json({ error: "Task not found" }, { status: 404 });
+            }
+
+            // Return success response
+            return NextResponse.json({ message: "Task deleted successfully" }, { status: 200 });
+        } else {
+            throw new Error("Unsupported database type in .env");
+        }
     } catch (error) {
-        console.error(error);
-        return NextResponse.json({ error: "Failed to delete task" }, { status: 500 });
+        console.error("Unexpected Error:", error);
+        return NextResponse.json(
+            { error: error instanceof Error ? error.message : "Internal Server Error" },
+            { status: 500 }
+        );
     }
 }

@@ -18,79 +18,74 @@ import ConfirmDeleteModal from "@/components/ConfirmDeleteModal";
 import EditTask from "@/components/EditTaskModal";
 import Task from "./Task";
 
-// interface Task {
-//   id: number;
-//   title: string;
-//   description: string;
-//   status: "to-do" | "in-progress" | "done";
-// }
-
 interface BoardProps {
-  tasks: Task[]; // Accept tasks as a prop
-  fetchTasks: () => void; // Accept fetchTasks as a prop
+  tasks: Task[];
+  fetchTasks: () => void;
 }
 
+// const databaseType = process.env.NEXT_PUBLIC_DATABASE; // Make sure it's accessible in the client
+
 export default function Board({ tasks, fetchTasks }: BoardProps) {
-  const [taskToDelete, setTaskToDelete] = useState<number | null>(null);
+  const [taskToDelete, setTaskToDelete] = useState<string | number | null>(
+    null
+  );
   const [taskToDeleteTitle, setTaskToDeleteTitle] = useState<string>("");
-  const [taskToID, setTaskToID] = useState<number | null>(null);
-  const [taskToDescription, setTaskToDescription] = useState<string>("");
-  const [taskToTitle, setTaskToTitle] = useState<string>("");
-  const [taskToStatus, setTaskToStatus] = useState<
-    "to-do" | "in-progress" | "done"
-  >();
+  const [taskToEditID, setTaskToEditID] = useState<string | number | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setEditIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isEditLoading, setIsEditLoading] = useState(false);
-
   const [activeTask, setActiveTask] = useState<Task | null>(null);
-  const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
+  const [localTasks, setLocalTasks] = useState<Task[]>([]);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor)
   );
 
+  // Normalize task IDs for compatibility
+  const normalizeTasks = (tasks: Task[]) => {
+    return tasks.map((task) => ({
+      id: task._id ? String(task._id) : String(task.id ?? ""), // Ensure _id is converted properly
+      title: task.title,
+      description: task.description,
+      status: task.status,
+    }));
+  };
+
+  // Sync local state with `tasks` prop
   useEffect(() => {
-    setLocalTasks(tasks); // Sync state when `tasks` update
+    const normalized = normalizeTasks(tasks);
+    setLocalTasks(normalized);
+    console.log(
+      "✅ Really Fixed Normalized Tasks:",
+      JSON.stringify(normalized, null, 2)
+    ); // Logs correct IDs
   }, [tasks]);
 
-  const handleDeleteClick = (id: number, title: string): Promise<void> => {
-    return new Promise((resolve) => {
+  // Handle task deletion
+  const handleDeleteClick = (id: number | string, title: string) => {
+    return new Promise<void>((resolve) => {
+      // Your existing logic for handling delete...
       setTaskToDelete(id);
       setTaskToDeleteTitle(title);
       setIsModalOpen(true);
-      resolve();
-    });
-  };
-
-  const handleEditClick = (
-    id: number,
-    title: string,
-    description: string,
-    status: "to-do" | "in-progress" | "done"
-  ): Promise<void> => {
-    return new Promise((resolve) => {
-      setTaskToID(id);
-      setTaskToTitle(title);
-      setTaskToDescription(description);
-      setTaskToStatus(status);
-      setEditIsModalOpen(true);
-      resolve();
+      resolve(); // Ensure it returns a Promise<void>
     });
   };
 
   const handleConfirmDelete = async () => {
     if (!taskToDelete) return;
     setIsLoading(true);
+
     try {
       await toast.promise(
         fetch(`/api/tasks/delete/${taskToDelete}`, {
           method: "DELETE",
         }).then((response) => {
-          if (!response.ok) {
-            throw new Error("Failed to delete task.");
-          }
+          if (!response.ok) throw new Error("Failed to delete task.");
           return response.json();
         }),
         {
@@ -101,20 +96,27 @@ export default function Board({ tasks, fetchTasks }: BoardProps) {
       );
       fetchTasks();
     } catch (error) {
-      if (error instanceof Error) {
-        toast.error(`❌ ${error.message}`);
-      } else {
-        toast.error("❌ An unknown error occurred.");
-      }
+      toast.error(
+        `❌ ${error instanceof Error ? error.message : "Unknown error"}`
+      );
     } finally {
       setIsLoading(false);
+      setIsModalOpen(false);
+      setTaskToDelete(null);
     }
-    setIsModalOpen(false);
-    setTaskToDelete(null);
+  };
+
+  // Handle edit click
+  const handleEditClick = (id: number | string): Promise<void> => {
+    return new Promise<void>((resolve) => {
+      setTaskToEditID(id);
+      setEditIsModalOpen(true);
+      resolve(); // Ensure it returns a Promise<void>
+    });
   };
 
   const handleEditSubmit = async (data: {
-    id: number;
+    id: number | string;
     title: string;
     description: string;
     status: "to-do" | "in-progress" | "done";
@@ -140,18 +142,19 @@ export default function Board({ tasks, fetchTasks }: BoardProps) {
         toast.error(result.message);
       }
     } catch (error) {
-      toast.error("Error updating task");
+      toast.error(`Error updating task. Error: ${error}`);
     } finally {
       setIsEditLoading(false);
       setEditIsModalOpen(false);
     }
   };
 
-  // Update Task from Dragging (by the status)
-  const handleTaskMove = async (taskId: number, newStatus: Task["status"]) => {
+  // Handle task movement via drag-and-drop
+  const handleTaskMove = async (taskId: string, newStatus: Task["status"]) => {
     try {
       setIsLoading(true);
-      const task = tasks.find((t) => t.id === taskId);
+      // const task = localTasks.find((t) => t.id === taskId);
+      const task = localTasks.find((t) => String(t.id || t._id) === taskId);
       if (!task) {
         toast.error("❌ Task not found.");
         return;
@@ -167,59 +170,99 @@ export default function Board({ tasks, fetchTasks }: BoardProps) {
         }),
       });
 
-      // toast.success("✅ Task updated successfully!");
       fetchTasks();
     } catch (error) {
-      toast.error("❌ Failed to update task.");
+      toast.error(`❌ Failed to update task. Error: ${error}`);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Handle drag start
   const handleDragStart = (event: DragStartEvent) => {
-    const { active } = event;
-    const taskId = Number((active.id as string).split("-")[1]);
-    const task = tasks.find((t) => t.id === taskId);
+    // Remove 'task-' prefix from event.active.id if present
+    const taskId = String(event.active.id).replace(/^task-/, ""); // Strip the 'task-' prefix
+
+    // Normalize comparison with string IDs for MongoDB and MySQL
+    const task = tasks.find((t) => String(t._id || t.id) === taskId);
+    console.log("start drag triggered: ", task);
+
     setActiveTask(task || null);
   };
 
+  // Handle drag end
   const handleDragEnd = async (event: DragEndEvent) => {
     setActiveTask(null);
     const { active, over } = event;
 
-    if (!over) return; // If dropped outside, do nothing
+    console.log("Drag End - Active Task:", active);
+    console.log("Drag End - Over Element:", over);
 
-    const taskId = Number((active.id as string).split("-")[1]);
+    if (!over) return;
 
-    // Type over.id as "to-do" | "in-progress" | "done"
-    const newStatus: "to-do" | "in-progress" | "done" = over.id as
-      | "to-do"
-      | "in-progress"
-      | "done";
+    // Remove 'task-' prefix from active.id if present
+    const taskId = String(active.id).replace(/^task-/, "");
+    const newStatus = over.id as "to-do" | "in-progress" | "done";
 
+    console.log("Task ID:", taskId);
+    console.log("New Status:", newStatus);
+
+    // Ensure valid status before continuing
     if (!["to-do", "in-progress", "done"].includes(newStatus)) return;
 
-    // 🔹 Get the original task before moving
-    const task = tasks.find((t) => t.id === taskId);
-    if (!task || task.status === newStatus) return; // No need to update
+    // Debugging Task ID and available tasks
+    console.log("Current Tasks:", tasks);
 
-    const prevStatus = task.status; // Save original status in case of failure
+    // Find the task using the appropriate ID
+    const task = tasks.find((t) => {
+      const taskIdMatch = String(t._id || t.id) === taskId;
+      console.log(
+        `Checking task with ID ${t._id || t.id} against ${taskId}:`,
+        taskIdMatch
+      );
+      return taskIdMatch;
+    });
 
-    // 🔹 Step 1: Optimistically update the UI (task stays in new column)
-    setLocalTasks((prevTasks) =>
-      prevTasks.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t))
+    // If task is not found or status is the same, exit early
+    if (!task) {
+      console.log("Task not found!");
+      return;
+    }
+    if (task.status === newStatus) {
+      console.log("Task status is the same. No update needed.");
+      return;
+    }
+
+    console.log("Task found:", task);
+
+    // Optimistically update UI
+    const updatedTasks = localTasks.map((t) =>
+      String(t.id || t._id) === taskId ? { ...t, status: newStatus } : t
     );
+    console.log("Updated Tasks: ", updatedTasks);
+    setLocalTasks(updatedTasks); // Update local state immediately
 
     try {
-      // 🔹 Step 2: Call API to update task status
-      await handleTaskMove(taskId, newStatus);
-    } catch (error) {
-      toast.error("❌ Failed to update task. Reverting...");
+      console.log("Init try statement");
 
-      // 🔹 Step 3: Revert task to original column if API fails
+      // Call your API to persist the task status change
+      await handleTaskMove(taskId, newStatus);
+      console.log("await passed through with data: ", taskId, newStatus);
+
+      // If the API call is successful, update the localTasks with the final status
       setLocalTasks((prevTasks) =>
         prevTasks.map((t) =>
-          t.id === taskId ? { ...t, status: prevStatus } : t
+          String(t.id || t._id) === taskId ? { ...t, status: newStatus } : t
+        )
+      );
+    } catch (error) {
+      console.error("Error updating task:", error);
+      toast.error(`❌ Failed to update task. Reverting... Error: ${error}`);
+
+      // Revert task status to previous value in case of failure
+      setLocalTasks((prevTasks) =>
+        prevTasks.map((t) =>
+          String(t.id || t._id) === taskId ? { ...t, status: task.status } : t
         )
       );
     }
@@ -235,30 +278,17 @@ export default function Board({ tasks, fetchTasks }: BoardProps) {
           onDragEnd={handleDragEnd}
         >
           <div className="flex gap-4 p-4">
-            {/* ✅ Columns are Droppable */}
-            <Column
-              id="to-do"
-              title="To Do"
-              tasks={localTasks.filter((t) => t.status === "to-do")}
-              onDelete={handleDeleteClick}
-              onEdit={handleEditClick}
-            />
-            <Column
-              id="in-progress"
-              title="In Progress"
-              tasks={localTasks.filter((t) => t.status === "in-progress")}
-              onDelete={handleDeleteClick}
-              onEdit={handleEditClick}
-            />
-            <Column
-              id="done"
-              title="Done"
-              tasks={localTasks.filter((t) => t.status === "done")}
-              onDelete={handleDeleteClick}
-              onEdit={handleEditClick}
-            />
+            {["to-do", "in-progress", "done"].map((status) => (
+              <Column
+                key={status}
+                id={status}
+                title={status.replace("-", " ").toUpperCase()}
+                tasks={localTasks.filter((t) => t.status === status)}
+                onDelete={handleDeleteClick}
+                onEdit={handleEditClick}
+              />
+            ))}
           </div>
-          {/* ✅ DragOverlay for smooth dragging */}
           <DragOverlay>
             {activeTask ? <Task {...activeTask} isOverlay /> : null}
           </DragOverlay>
@@ -276,7 +306,7 @@ export default function Board({ tasks, fetchTasks }: BoardProps) {
         isOpen={isEditModalOpen}
         onClose={() => setEditIsModalOpen(false)}
         onSubmit={handleEditSubmit}
-        task={tasks.find((task) => task.id === Number(taskToID)) || null}
+        task={localTasks.find((task) => task.id === taskToEditID) || null}
         isLoading={isEditLoading}
       />
     </>

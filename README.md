@@ -1,36 +1,66 @@
-This is a KanBan (Task Manager)
+# KanBan (Task Manager)
+
+Kanban is a simple task manager that allows you to create tasks and drag-and-drop them between columns (To Do | In Progress | Done). It also includes features for editing and deleting tasks.
+
+## Table of Contents
+
+- [Getting Started](#getting-started)
+- [Setup Environment Variables](#setup-environment-variables)
+- [For MySQL](#for-mysql)
+- [Development Mode](#development-mode)
+- [Production Mode](#production-mode)
+
 
 ## Getting Started
 
-First, run the development server:
+### Clone the repository
 
+**SSH**:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone git@github.com:oroshi80/task_manager.git
+```
+**HTTP**:
+```bash
+git clone https://github.com/oroshi80/task_manager.git
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup Environment Variables
+create a `.env` file and add the following variables:
+```bash
+DATABASE="mongoDB" # Choose database: MySQL || mongoDB 
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# MySQL
+MYSQL_HOST=""
+MYSQL_USER=""
+MYSQL_PASS=""
+MYSQL_DB="kanban"
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# MongoDB
+MONGODB_URI = "<MONGODB_DB_URL>"
+MONGODB_DB="kanbanDB"
+```
+## For MySQL
 
-## Learn More
+If you're using MySQL, create the following table:
+```sql 
+CREATE TABLE `tasks` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  `status` enum('to-do','in-progress','done') NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Development Mode
+```bash 
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Production Mode 
+```bash 
+npm run start
+```
+# Questions or Issues?
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Please report any issues on the [GitHub Issues page](https://github.com/oroshi80/task_manager/issues).
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

@@ -14,7 +14,7 @@ import {
 import { useForm } from "react-hook-form";
 
 interface TaskFormData {
-  id: number;
+  id: number | string;
   title: string;
   description: string;
   status: "to-do" | "in-progress" | "done";
@@ -28,12 +28,13 @@ interface EditTaskProps {
   isLoading: boolean;
 }
 
+const databaseType = process.env.DATABASE;
+
 export default function EditTask({
   isOpen,
   onClose,
   onSubmit,
   task,
-  isLoading,
 }: EditTaskProps) {
   const {
     register,
@@ -77,7 +78,8 @@ export default function EditTask({
     <Modal isOpen={isOpen} onOpenChange={onClose}>
       <ModalContent>
         <ModalHeader>
-          Edit Task #{task.id} - {task.title}
+          Edit Task {databaseType !== "mongoDB" ? "" : `#${task.id}`} -{" "}
+          {task.title}
         </ModalHeader>
         <ModalBody>
           <form onSubmit={handleSubmit(onFormSubmit)} id="task-form">

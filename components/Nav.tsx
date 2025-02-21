@@ -7,9 +7,9 @@ import {
   NavbarItem,
   NavbarMenuToggle,
   NavbarMenu,
-  NavbarMenuItem,
-  Link,
-  Button,
+  // NavbarMenuItem,
+  // Link,
+  // Button,
 } from "@heroui/react";
 import { BsKanban } from "react-icons/bs";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
@@ -17,18 +17,18 @@ import ThemeSwitcher from "@/components/ThemeSwitcher";
 export default function Nav() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
-  const menuItems = [
-    "Profile",
-    "Dashboard",
-    "Activity",
-    "Analytics",
-    "System",
-    "Deployments",
-    "My Settings",
-    "Team Settings",
-    "Help & Feedback",
-    "Log Out",
-  ];
+  // const menuItems = [
+  //   "Profile",
+  //   "Dashboard",
+  //   "Activity",
+  //   "Analytics",
+  //   "System",
+  //   "Deployments",
+  //   "My Settings",
+  //   "Team Settings",
+  //   "Help & Feedback",
+  //   "Log Out",
+  // ];
 
   return (
     <Navbar onMenuOpenChange={setIsMenuOpen}>

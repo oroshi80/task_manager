@@ -5,14 +5,14 @@ import { Divider, Tooltip, Button } from "@heroui/react";
 import { FaTimes, FaPen } from "react-icons/fa";
 
 interface TaskProps {
-  id: number;
+  id: number | string;
   title: string;
   description: string;
   status: "to-do" | "in-progress" | "done";
   isOverlay?: boolean; // Add this line
-  onDelete?: (id: number, title: string) => void;
+  onDelete?: (id: number | string, title: string) => void;
   onEdit?: (
-    id: number,
+    id: number | string,
     title: string,
     description: string,
     status: "to-do" | "in-progress" | "done"
