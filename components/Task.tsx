@@ -32,6 +32,9 @@ const Task: React.FC<TaskProps> = ({
     id: `task-${id}`,
   });
 
+  // Log the isDragging value to the console
+  // console.log("isDragging: ", isDragging);
+
   const style = {
     transform: isOverlay ? "scale(1.05)" : undefined,
     boxShadow: isOverlay ? "0px 5px 15px rgba(0,0,0,0.2)" : undefined,
@@ -44,13 +47,13 @@ const Task: React.FC<TaskProps> = ({
       {...attributes}
       {...listeners}
       style={style}
-      className={`relative bg-white dark:bg-neutral-300 text-black p-2 mb-2 rounded shadow group `}
+      className={`relative bg-white dark:bg-neutral-300 text-black p-2 mb-2 rounded shadow group`}
     >
       <div className="absolute top-1 right-2 hidden group-hover:flex gap-1">
-        <Tooltip content="Edit">
+        <Tooltip content="Edit" isDisabled={isOverlay}>
           <Button
             color="default"
-            className="rounded-full opacity-20"
+            className={`rounded-full opacity-20`}
             size="sm"
             isIconOnly
             onPress={() => onEdit?.(id, title, description, status)}
@@ -58,10 +61,10 @@ const Task: React.FC<TaskProps> = ({
             <FaPen />
           </Button>
         </Tooltip>
-        <Tooltip content="Delete">
+        <Tooltip content="Delete" isDisabled={isOverlay}>
           <Button
             color="danger"
-            className="rounded-full opacity-20"
+            className={`rounded-full opacity-20`}
             size="sm"
             isIconOnly
             onPress={() => onDelete?.(id, title)}
