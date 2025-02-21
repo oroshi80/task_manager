@@ -46,6 +46,7 @@ const Task: React.FC<TaskProps> = ({
       ref={setNodeRef}
       {...attributes}
       {...listeners}
+      tabIndex={0} // Make task focusable for keyboard users
       style={style}
       className={`relative bg-white dark:bg-neutral-300 text-black p-2 mb-2 rounded shadow group`}
     >

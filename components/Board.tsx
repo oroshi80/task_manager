@@ -11,6 +11,7 @@ import {
   useSensor,
   useSensors,
   rectIntersection,
+  TouchSensor,
 } from "@dnd-kit/core";
 import Column from "./Column";
 import { toast } from "react-toastify";
@@ -42,6 +43,12 @@ export default function Board({ tasks, fetchTasks }: BoardProps) {
 
   const sensors = useSensors(
     useSensor(PointerSensor),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 150, // Short delay before dragging (prevents accidental taps)
+        tolerance: 5, // Ignore tiny movements
+      },
+    }),
     useSensor(KeyboardSensor)
   );
 
@@ -270,14 +277,14 @@ export default function Board({ tasks, fetchTasks }: BoardProps) {
 
   return (
     <>
-      <div className="flex gap-4 p-4">
+      <div className="gap-4 p-4">
         <DndContext
           sensors={sensors}
           collisionDetection={rectIntersection}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <div className="flex gap-4 p-4">
+          <div className="flex flex-col sm:flex-row gap-y-4 sm:gap-x-4 p-4">
             {["to-do", "in-progress", "done"].map((status) => (
               <Column
                 key={status}
@@ -289,6 +296,7 @@ export default function Board({ tasks, fetchTasks }: BoardProps) {
               />
             ))}
           </div>
+
           <DragOverlay>
             {activeTask ? <Task {...activeTask} isOverlay /> : null}
           </DragOverlay>
