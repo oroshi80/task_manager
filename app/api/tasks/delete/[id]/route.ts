@@ -7,10 +7,10 @@ interface QueryResult {
     affectedRows: number;
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: Record<string, string> }) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
     // Wait for params to be resolved
 
-    const { id } = await params; // Await params before destructuring
+    const { id } = params; // Await params before destructuring
     const databaseType = process.env.DATABASE; // Get the database type from .env
 
     // Validate if ID is provided
