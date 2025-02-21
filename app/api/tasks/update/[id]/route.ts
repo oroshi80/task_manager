@@ -7,7 +7,7 @@ interface QueryResult {
     affectedRows: number;
 }
 
-export async function PUT(req: NextRequest, context: { params: { id: string } }) {
+export async function PUT(req: NextRequest, context: { params: Promise<Record<string, string>> }) {
     // Await the params object
     const { id } = await context.params;
     const { title, description, status } = await req.json(); // Parse the JSON body
