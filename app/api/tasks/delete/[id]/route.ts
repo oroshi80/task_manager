@@ -7,7 +7,7 @@ interface QueryResult {
     affectedRows: number;
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: number | string } }) {
     // Wait for params to be resolved
 
     const { id } = await params; // Await params before destructuring
