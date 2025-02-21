@@ -7,8 +7,13 @@ interface QueryResult {
     affectedRows: number;
 }
 
-export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
-    const { id } = context.params; // Directly access params
+// Define the type for the params in dynamic routes
+type Params = {
+    id: string; // id is always a string in dynamic routes
+};
+
+export async function DELETE(req: NextRequest, { params }: { params: Params }) {
+    const { id } = params; // Destructure params directly
 
     const databaseType = process.env.DATABASE; // Get the database type from .env
 
@@ -40,7 +45,7 @@ export async function DELETE(req: NextRequest, context: { params: { id: string }
             const [result] = await db.execute(query, values) as QueryResult[]; // Destructure the result
 
             // Check affectedRows in the result
-            if ((result).affectedRows === 0) {
+            if (result.affectedRows === 0) {
                 return NextResponse.json({ error: "Task not found" }, { status: 404 });
             }
 
