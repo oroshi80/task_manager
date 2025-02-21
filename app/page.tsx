@@ -6,6 +6,7 @@ import AddTask from "@/components/AddTaskModal";
 import Board from "@/components/Board";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useTheme } from "next-themes";
 
 interface Tasks {
   id: number;
@@ -21,6 +22,9 @@ export default function Home() {
   const circleRadius = 500;
   const backgroundRef = useRef<HTMLDivElement | null>(null);
   const mousePositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  //theme
+  const { theme } = useTheme();
 
   // Fetch tasks when the component mounts or when a new task is added
   const fetchTasks = async () => {
@@ -42,9 +46,15 @@ export default function Home() {
   // hover effect
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
+      let SpotLight;
+      if (theme === "dark") {
+        SpotLight = "rgba(255, 255, 255, 0.1)";
+      } else {
+        SpotLight = "rgba(0, 0, 0, 0.1)";
+      }
       mousePositionRef.current = { x: e.pageX, y: e.pageY };
       if (backgroundRef.current) {
-        backgroundRef.current.style.background = `radial-gradient(circle ${circleRadius}px at ${mousePositionRef.current.x}px ${mousePositionRef.current.y}px, rgba(255,255,255,0.1) , transparent)`;
+        backgroundRef.current.style.background = `radial-gradient(circle ${circleRadius}px at ${mousePositionRef.current.x}px ${mousePositionRef.current.y}px, ${SpotLight} , transparent)`;
       }
     };
 
@@ -53,7 +63,7 @@ export default function Home() {
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
     };
-  }, []);
+  }, [theme]);
 
   const handleAddTask = async (data: {
     title: string;
@@ -95,10 +105,10 @@ export default function Home() {
   return (
     <main
       ref={backgroundRef}
-      className="h-screen"
+      className="h-screen BG_EFFECT"
       style={{ maxHeight: "calc(100vh - 70px)" }}
     >
-      <div className="flex justify-center items-center">
+      <div className="flex justify-center items-center pt-5">
         <Button
           endContent={<FaPlus />}
           onPress={() => setIsModalOpen(true)}
