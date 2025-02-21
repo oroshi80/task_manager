@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import db from "@/lib/mysql"; // MySQL connection (promise-compatible)
 import dbConnect from "@/lib/mongoDB"; // MongoDB connection
 
-function isTaskArray(result: any): result is Task[] {
+function isTaskArray(result: unknown): result is Task[] {
     return Array.isArray(result) && result.every(item => "id" in item && "title" in item);
 }
 

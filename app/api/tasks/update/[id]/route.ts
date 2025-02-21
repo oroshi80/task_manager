@@ -3,6 +3,10 @@ import dbConnect from "@/lib/mongoDB"; // MongoDB connection
 import { NextRequest, NextResponse } from "next/server";
 import { ObjectId } from "mongodb"; // Import ObjectId from mongodb
 
+interface QueryResult {
+    affectedRows: number;
+}
+
 export async function PUT(req: NextRequest, context: { params: { id: string } }) {
     // Await the params object
     const { id } = await context.params;
@@ -40,9 +44,9 @@ export async function PUT(req: NextRequest, context: { params: { id: string } })
             const values = [title, description, status, id];
 
             // Execute the query using the connection pool
-            const [result] = await db.execute(query, values);
+            const [result] = await db.execute(query, values) as QueryResult[];
 
-            if ((result as any).affectedRows === 0) {
+            if ((result).affectedRows === 0) {
                 return NextResponse.json({ error: "Task not found" }, { status: 404 });
             }
 

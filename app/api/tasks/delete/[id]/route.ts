@@ -3,9 +3,13 @@ import db from "@/lib/mysql"; // MySQL pool connection
 import dbConnect from "@/lib/mongoDB"; // MongoDB connection
 import { ObjectId } from "mongodb"; // Import ObjectId from mongodb
 
+interface QueryResult {
+    affectedRows: number;
+}
+
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
     // Wait for params to be resolved
-    req;
+
     const { id } = await params; // Await params before destructuring
     const databaseType = process.env.DATABASE; // Get the database type from .env
 
@@ -34,10 +38,10 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
             const values = [id];
 
             // Execute the query using the connection pool
-            const [result] = await db.execute(query, values); // Destructure the result
+            const [result] = await db.execute(query, values) as QueryResult[]; // Destructure the result
 
             // Check affectedRows in the result
-            if ((result as any).affectedRows === 0) {
+            if ((result).affectedRows === 0) {
                 return NextResponse.json({ error: "Task not found" }, { status: 404 });
             }
 
