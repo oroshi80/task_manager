@@ -8,7 +8,7 @@ interface QueryResult {
     affectedRows: number;
 }
 
-export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: { params: Promise<Record<string, string>> }) {
     // Await params before accessing its properties
     const { id } = await context.params;  // Now we await context.params
 
