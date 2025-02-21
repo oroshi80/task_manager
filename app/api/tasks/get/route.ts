@@ -2,19 +2,22 @@ import { NextResponse } from "next/server";
 import db from "@/lib/mysql"; // MySQL connection (promise-compatible)
 import dbConnect from "@/lib/mongoDB"; // MongoDB connection
 
+
 function isTaskArray(result: unknown): result is Task[] {
     return Array.isArray(result) && result.every(item => "id" in item && "title" in item);
 }
 
 export async function GET() {
     const databaseType = process.env.DATABASE; // Get database type from .env
-    let tasks: Task[] = []; // Explicitly type the tasks array
+    let tasks; // Explicitly type the tasks array
 
     try {
         if (databaseType === "mongoDB") {
             // MongoDB query
             const { db: mdb } = await dbConnect(); // Connect to MongoDB
-            tasks = await mdb.collection("tasks").find({}).toArray(); // Fetch tasks
+
+            tasks = await mdb.collection("tasks").find({}).toArray(); // Fetch task
+
         } else if (databaseType === "MySQL") {
             // MySQL query
             const [rows] = await db.query("SELECT * FROM tasks");
