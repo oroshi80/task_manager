@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@heroui/react";
 import { FaPlus } from "react-icons/fa";
 import AddTask from "@/components/AddTaskModal";
@@ -15,8 +15,12 @@ interface Tasks {
 }
 
 export default function Home() {
+  // Consts
   const [tasks, setTasks] = useState<Tasks[]>([]); // Task state initialized properly
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const circleRadius = 500;
+  const backgroundRef = useRef<HTMLDivElement | null>(null);
+  const mousePositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   // Fetch tasks when the component mounts or when a new task is added
   const fetchTasks = async () => {
@@ -34,6 +38,22 @@ export default function Home() {
   useEffect(() => {
     fetchTasks();
   }, []); // Fetch tasks once on component mount
+
+  // hover effect
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mousePositionRef.current = { x: e.pageX, y: e.pageY };
+      if (backgroundRef.current) {
+        backgroundRef.current.style.background = `radial-gradient(circle ${circleRadius}px at ${mousePositionRef.current.x}px ${mousePositionRef.current.y}px, rgba(255,255,255,0.1) , transparent)`;
+      }
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
 
   const handleAddTask = async (data: {
     title: string;
@@ -73,7 +93,11 @@ export default function Home() {
   };
 
   return (
-    <>
+    <main
+      ref={backgroundRef}
+      className="h-screen"
+      style={{ maxHeight: "calc(100vh - 70px)" }}
+    >
       <div className="flex justify-center items-center">
         <Button
           endContent={<FaPlus />}
@@ -93,6 +117,6 @@ export default function Home() {
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleAddTask}
       />
-    </>
+    </main>
   );
 }
