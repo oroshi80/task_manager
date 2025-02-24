@@ -12,11 +12,13 @@
   :root {
     --background: transparent; /* Transparent Background in Dark Mode */
     --foreground: #ffffff; /* Light Mode Dots (Foreground Color) */
-
   }
 }
 
 body {
+
+  @apply tracking-wide;
+
   color: var(--foreground);
   background-color: var(--background); /* Transparent background */
   background-image: radial-gradient(var(--dots) 0.75px, transparent 0.75px); /* Pattern with foreground color */

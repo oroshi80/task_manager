@@ -275,6 +275,12 @@ export default function Board({ tasks, fetchTasks }: BoardProps) {
     }
   };
 
+  const statusMapping: Record<Task["status"], string> = {
+    "to-do": "To Do",
+    "in-progress": "In Progress",
+    done: "Done",
+  };
+
   return (
     <>
       <div className="gap-4 p-4">
@@ -285,11 +291,11 @@ export default function Board({ tasks, fetchTasks }: BoardProps) {
           onDragEnd={handleDragEnd}
         >
           <div className="flex flex-col sm:flex-row gap-y-4 sm:gap-x-4 p-4">
-            {["to-do", "in-progress", "done"].map((status) => (
+            {Object.keys(statusMapping).map((status) => (
               <Column
                 key={status}
                 id={status}
-                title={status.replace("-", " ").toUpperCase()}
+                title={statusMapping[status as keyof typeof statusMapping]} // No casting needed
                 tasks={localTasks.filter((t) => t.status === status)}
                 onDelete={handleDeleteClick}
                 onEdit={handleEditClick}
