@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { Button } from "@heroui/react";
+import { Button, Kbd } from "@heroui/react";
 import { FaPlus } from "react-icons/fa";
 import AddTask from "@/components/AddTaskModal";
 import Board from "@/components/Board";
@@ -121,6 +121,26 @@ export default function Home() {
         <Board tasks={tasks} fetchTasks={fetchTasks} />{" "}
         {/* Pass fetchTasks to Board */}
       </main>
+      <div className="flex justify-center items-center gap-2">
+        <span className="text-lg font-semibold pb-2">
+          How to use Drag n Drop
+        </span>
+      </div>
+      <div className="flex justify-center items-center gap-2">
+        <div className="flex justify-center items-center gap-2">
+          Keyboard: Press <Kbd>Tab</Kbd> to select a card. Then, press{" "}
+          <Kbd key="space">Space</Kbd> to pick it up. Use the arrow keys{" "}
+          <Kbd keys="up" /> <Kbd keys="down" /> <Kbd keys="left" />{" "}
+          <Kbd keys="right" /> to move the card. Press <Kbd>Space</Kbd> again to
+          release the card, or press <Kbd key="escape">Esc</Kbd> to cancel.
+        </div>
+      </div>
+      <div className="flex justify-center items-center gap-2">
+        Mobile: Use two fingers to drag the card to a different column. To edit
+        or delete a card, touch and hold the card with one finger for a few
+        seconds. The edit/delete buttons will appear—touch either button to
+        perform the action.
+      </div>
 
       <AddTask
         isOpen={isModalOpen}

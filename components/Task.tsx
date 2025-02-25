@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import {
   Divider,
@@ -38,14 +38,14 @@ const Task: React.FC<TaskProps> = ({
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `task-${id}`,
   });
-
-  // Log the isDragging value to the console
-  // console.log("isDragging: ", isDragging);
+  const [isFocused, setIsFocused] = useState(false);
 
   const style = {
     transform: isOverlay ? "scale(1.05)" : undefined,
     boxShadow: isOverlay ? "0px 5px 15px rgba(0,0,0,0.2)" : undefined,
     opacity: isDragging ? 0.5 : 1,
+    outline: isFocused ? "2px solid #006fee" : undefined, // Add outline for focus
+    outlineOffset: "3px", // Optional: adds space between the element and outline
   };
 
   return (
@@ -55,6 +55,8 @@ const Task: React.FC<TaskProps> = ({
       {...listeners}
       tabIndex={0} // Make task focusable for keyboard users
       style={style}
+      onFocus={() => setIsFocused(true)} // Set focus state on focus
+      onBlur={() => setIsFocused(false)} // Remove focus state on blur
       className={`relative bg-white dark:bg-black text:black dark:text-white p-2 mb-2 rounded shadow group 
   ${
     status === "to-do"
@@ -68,7 +70,7 @@ const Task: React.FC<TaskProps> = ({
     >
       <CardHeader className="text-lg ">
         {title}
-        <div className="absolute top-1 right-2 hidden group-hover:flex gap-1">
+        <div className="absolute top-2 right-2 hidden group-hover:flex gap-1">
           <Tooltip content="Edit" isDisabled={isOverlay}>
             <Button
               color="default"
