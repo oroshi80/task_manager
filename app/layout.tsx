@@ -1,7 +1,9 @@
+import * as React from "react";
 import type { Metadata } from "next";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import HeroUIProvider from "@/app/HeroUIProvider";
+
 import { ToastContainer } from "react-toastify";
 
 export const metadata: Metadata = {
