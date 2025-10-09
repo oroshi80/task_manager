@@ -79,12 +79,15 @@ export default function EditTask({
 
   if (!isOpen || !task) return null; // Early return if task is null or modal is closed
 
+  //returning the Model Header with the mogoDB or no
+
   return (
     <Modal isOpen={isOpen} onOpenChange={onClose}>
       <ModalContent>
         <ModalHeader>
-          Edit Task {databaseType !== "mongoDB" ? "" : `#${task.id}`} -{" "}
-          {task.title}
+          {databaseType === "mongoDB"
+            ? `#${task.id} - ${task.title}`
+            : task.title}
         </ModalHeader>
         <ModalBody>
           <form onSubmit={handleSubmit(onFormSubmit)} id="task-form">
