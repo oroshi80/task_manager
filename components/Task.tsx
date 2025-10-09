@@ -48,6 +48,14 @@ const Task: React.FC<TaskProps> = ({
     outlineOffset: "3px", // Optional: adds space between the element and outline
   };
 
+  const statusBorderMap: Record<string, string> = {
+    "to-do": "border-l-4 transition-all border-red-500",
+    "in-progress": "border-l-4 transition-all border-yellow-500",
+    done: "border-l-4 transition-all border-green-500",
+  };
+
+  const borderClass = statusBorderMap[status] || "";
+
   return (
     <Card
       ref={setNodeRef}
@@ -57,16 +65,7 @@ const Task: React.FC<TaskProps> = ({
       style={style}
       onFocus={() => setIsFocused(true)} // Set focus state on focus
       onBlur={() => setIsFocused(false)} // Remove focus state on blur
-      className={`relative bg-white dark:bg-black text:black dark:text-white p-2 mb-2 rounded shadow group 
-  ${
-    status === "to-do"
-      ? "border-l-4 transition-all border-red-500"
-      : status === "in-progress"
-      ? "border-l-4 transition-all border-yellow-500"
-      : status === "done"
-      ? "border-l-4 transition-all border-green-500"
-      : ""
-  }`}
+      className={`relative bg-white dark:bg-black text:black dark:text-white p-2 mb-2 rounded shadow group ${borderClass}`}
     >
       <CardHeader className="text-lg ">
         {title}

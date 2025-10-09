@@ -35,7 +35,7 @@ export default function EditTask({
   onClose,
   onSubmit,
   task,
-}: EditTaskProps) {
+}: Readonly<EditTaskProps>) {
   const {
     register,
     handleSubmit,
@@ -65,11 +65,16 @@ export default function EditTask({
     }
   }, [isOpen, task, reset]);
 
-  const onFormSubmit = async (data: TaskFormData) => {
+  const onFormSubmit = async (data: TaskFormData): Promise<void> => {
     setIsEditLoading(true);
-    await onSubmit(data); // Call the parent onSubmit to send the data to API
-    setIsEditLoading(false); // Stop loading once done
-    onClose(); // Close the modal after submission
+    try {
+      await Promise.resolve(onSubmit(data)); // Call the parent onSubmit to send the data to API
+    } catch (err) {
+      console.error("Submission failed", err);
+    } finally {
+      setIsEditLoading(false); // Stop loading once done
+      onClose(); // Close the modal after submission
+    }
   };
 
   if (!isOpen || !task) return null; // Early return if task is null or modal is closed
@@ -85,37 +90,43 @@ export default function EditTask({
           <form onSubmit={handleSubmit(onFormSubmit)} id="task-form">
             <div className="flex flex-col gap-4">
               <div>
-                <label>Task Title</label>
-                <Input
-                  {...register("title", { required: "Title is required" })}
-                  placeholder="Enter task title"
-                />
+                <label>
+                  Task Title
+                  <Input
+                    {...register("title", { required: "Title is required" })}
+                    placeholder="Enter task title"
+                  />
+                </label>
                 {errors.title && <span>{errors.title.message}</span>}
               </div>
 
               <div>
-                <label>Task Description</label>
-                <Textarea
-                  {...register("description", {
-                    required: "Description is required",
-                  })}
-                  placeholder="Enter task description"
-                />
+                <label>
+                  Task Description
+                  <Textarea
+                    {...register("description", {
+                      required: "Description is required",
+                    })}
+                    placeholder="Enter task description"
+                  />
+                </label>
                 {errors.description && (
                   <span>{errors.description.message}</span>
                 )}
               </div>
 
               <div>
-                <label>Task Status</label>
-                <Select
-                  {...register("status", { required: "Status is required" })}
-                  value={task.status} // Ensure the correct status is selected
-                >
-                  <SelectItem key="to-do">To Do</SelectItem>
-                  <SelectItem key="in-progress">In Progress</SelectItem>
-                  <SelectItem key="done">Done</SelectItem>
-                </Select>
+                <label>
+                  Task Status
+                  <Select
+                    {...register("status", { required: "Status is required" })}
+                    value={task.status} // Ensure the correct status is selected
+                  >
+                    <SelectItem key="to-do">To Do</SelectItem>
+                    <SelectItem key="in-progress">In Progress</SelectItem>
+                    <SelectItem key="done">Done</SelectItem>
+                  </Select>
+                </label>
                 {errors.status && <span>{errors.status.message}</span>}
               </div>
             </div>

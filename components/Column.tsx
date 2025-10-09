@@ -28,7 +28,7 @@ export default function Column({
   tasks,
   onDelete,
   onEdit,
-}: ColumnProps) {
+}: Readonly<ColumnProps>) {
   const { setNodeRef } = useDroppable({ id }); // ✅ Make column droppable
 
   return (

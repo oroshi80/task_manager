@@ -2,7 +2,6 @@
 import * as React from "react";
 import dynamic from "next/dynamic";
 import { HeroUIProvider } from "@heroui/react";
-// import { ThemeProvider as NextThemesProvider } from "next-themes";
 
 const NextThemesProvider = dynamic(
   () => import("next-themes").then((e) => e.ThemeProvider),
@@ -15,7 +14,7 @@ interface AppProps {
   children: React.ReactNode;
 }
 
-function App({ children }: AppProps) {
+function App({ children }: Readonly<AppProps>) {
   // 2. Wrap HeroUIProvider at the root of your app
   return (
     <HeroUIProvider>

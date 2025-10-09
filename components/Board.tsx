@@ -24,9 +24,7 @@ interface BoardProps {
   fetchTasks: () => void;
 }
 
-// const databaseType = process.env.NEXT_PUBLIC_DATABASE; // Make sure it's accessible in the client
-
-export default function Board({ tasks, fetchTasks }: BoardProps) {
+export default function Board({ tasks, fetchTasks }: Readonly<BoardProps>) {
   const [taskToDelete, setTaskToDelete] = useState<string | number | null>(
     null
   );
@@ -35,7 +33,7 @@ export default function Board({ tasks, fetchTasks }: BoardProps) {
     null
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditModalOpen, setEditIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isEditLoading, setIsEditLoading] = useState(false);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
@@ -117,7 +115,7 @@ export default function Board({ tasks, fetchTasks }: BoardProps) {
   const handleEditClick = (id: number | string): Promise<void> => {
     return new Promise<void>((resolve) => {
       setTaskToEditID(id);
-      setEditIsModalOpen(true);
+      setIsEditModalOpen(true);
       resolve(); // Ensure it returns a Promise<void>
     });
   };
@@ -152,7 +150,7 @@ export default function Board({ tasks, fetchTasks }: BoardProps) {
       toast.error(`Error updating task. Error: ${error}`);
     } finally {
       setIsEditLoading(false);
-      setEditIsModalOpen(false);
+      setIsEditModalOpen(false);
     }
   };
 
@@ -160,7 +158,6 @@ export default function Board({ tasks, fetchTasks }: BoardProps) {
   const handleTaskMove = async (taskId: string, newStatus: Task["status"]) => {
     try {
       setIsLoading(true);
-      // const task = localTasks.find((t) => t.id === taskId);
       const task = localTasks.find((t) => String(t.id || t._id) === taskId);
       if (!task) {
         toast.error("❌ Task not found.");
@@ -318,7 +315,7 @@ export default function Board({ tasks, fetchTasks }: BoardProps) {
       />
       <EditTask
         isOpen={isEditModalOpen}
-        onClose={() => setEditIsModalOpen(false)}
+        onClose={() => setIsEditModalOpen(false)}
         onSubmit={handleEditSubmit}
         task={localTasks.find((task) => task.id === taskToEditID) || null}
         isLoading={isEditLoading}

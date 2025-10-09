@@ -22,7 +22,11 @@ interface ModalProps {
   onSubmit: (data: TaskFormData) => void;
 }
 
-export default function AddTask({ isOpen, onClose, onSubmit }: ModalProps) {
+export default function AddTask({
+  isOpen,
+  onClose,
+  onSubmit,
+}: Readonly<ModalProps>) {
   const {
     register,
     handleSubmit,
@@ -30,12 +34,17 @@ export default function AddTask({ isOpen, onClose, onSubmit }: ModalProps) {
   } = useForm<TaskFormData>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const onFormSubmit = async (data: TaskFormData) => {
+  const onFormSubmit = async (data: TaskFormData): Promise<void> => {
     setIsLoading(true);
     // Call the parent onSubmit to send the data to API
-    await onSubmit(data);
-    setIsLoading(false); // Stop loading once done
-    onClose(); // Close the modal after submission
+    try {
+      await Promise.resolve(onSubmit(data));
+      onClose(); // Close the modal after submission
+    } catch (err) {
+      console.error("Submission failed", err);
+    } finally {
+      setIsLoading(false); // Stop loading once done
+    }
   };
 
   if (!isOpen) return null;
@@ -48,22 +57,26 @@ export default function AddTask({ isOpen, onClose, onSubmit }: ModalProps) {
           <form onSubmit={handleSubmit(onFormSubmit)} id="task-form">
             <div className="flex flex-col gap-4">
               <div>
-                <label>Task Title</label>
-                <Input
-                  {...register("title", { required: "Title is required" })}
-                  placeholder="Enter task title"
-                />
+                <label>
+                  Task Title
+                  <Input
+                    {...register("title", { required: "Title is required" })}
+                    placeholder="Enter task title"
+                  />
+                </label>
                 {errors.title && <span>{errors.title.message}</span>}
               </div>
 
               <div>
-                <label>Task Description</label>
-                <Textarea
-                  {...register("description", {
-                    required: "Description is required",
-                  })}
-                  placeholder="Enter task description"
-                />
+                <label>
+                  Task Description
+                  <Textarea
+                    {...register("description", {
+                      required: "Description is required",
+                    })}
+                    placeholder="Enter task description"
+                  />
+                </label>
                 {errors.description && (
                   <span>{errors.description.message}</span>
                 )}
@@ -72,7 +85,7 @@ export default function AddTask({ isOpen, onClose, onSubmit }: ModalProps) {
           </form>
         </ModalBody>
         <ModalFooter>
-          <Button color="danger" variant="light" onClick={onClose}>
+          <Button color="danger" variant="light" onPress={onClose}>
             Close
           </Button>
           <Button
