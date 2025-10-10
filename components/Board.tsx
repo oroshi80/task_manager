@@ -1,5 +1,5 @@
+// board.tsx
 "use client";
-
 import React, { useState, useEffect } from "react";
 import {
   DndContext,
@@ -16,12 +16,19 @@ import {
 import Column from "./Column";
 import { toast } from "react-toastify";
 import ConfirmDeleteModal from "@/components/ConfirmDeleteModal";
-import EditTask from "@/components/EditTaskModal";
+import TaskModal from "@/components/TaskModal";
 import Task from "./Task";
 
 interface BoardProps {
   tasks: Task[];
   fetchTasks: () => void;
+}
+
+interface EditTaskData {
+  id: number | string;
+  title: string;
+  description: string;
+  status: Task["status"];
 }
 
 export default function Board({ tasks, fetchTasks }: Readonly<BoardProps>) {
@@ -120,12 +127,8 @@ export default function Board({ tasks, fetchTasks }: Readonly<BoardProps>) {
     });
   };
 
-  const handleEditSubmit = async (data: {
-    id: number | string;
-    title: string;
-    description: string;
-    status: "to-do" | "in-progress" | "done";
-  }) => {
+  // const handleEditSubmit = async (data: {
+  const handleEditSubmit = async (data: EditTaskData) => {
     try {
       setIsEditLoading(true);
       const response = await fetch(`/api/tasks/update/${data.id}`, {
@@ -313,11 +316,13 @@ export default function Board({ tasks, fetchTasks }: Readonly<BoardProps>) {
         title={taskToDeleteTitle}
         isLoading={isLoading}
       />
-      <EditTask
+
+      <TaskModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         onSubmit={handleEditSubmit}
         task={localTasks.find((task) => task.id === taskToEditID) || null}
+        mode="edit"
         isLoading={isEditLoading}
       />
     </>

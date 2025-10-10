@@ -1,3 +1,4 @@
+//task.tsx
 "use client";
 import React, { useState } from "react";
 import { useDraggable } from "@dnd-kit/core";
@@ -99,56 +100,6 @@ const Task: React.FC<TaskProps> = ({
         {description}
       </CardBody>
     </Card>
-    //   <div
-    //     ref={setNodeRef}
-    //     {...attributes}
-    //     {...listeners}
-    //     tabIndex={0} // Make task focusable for keyboard users
-    //     style={style}
-    //     className={`relative bg-white dark:bg-black text:black dark:text-white p-2 mb-2 rounded shadow group
-    // ${
-    //   status === "to-do"
-    //     ? "border-l-4 border-red-500"
-    //     : status === "in-progress"
-    //     ? "border-l-4 border-yellow-500"
-    //     : status === "done"
-    //     ? "border-l-4 border-green-500"
-    //     : ""
-    // }`}
-    //   >
-    //     <div className="absolute top-1 right-2 hidden group-hover:flex gap-1">
-    //       <Tooltip content="Edit" isDisabled={isOverlay}>
-    //         <Button
-    //           color="default"
-    //           className="rounded-full opacity-75"
-    //           size="sm"
-    //           isIconOnly={true}
-    //           onPress={() => onEdit?.(id, title, description, status)}
-    //         >
-    //           <FaPen />
-    //         </Button>
-    //       </Tooltip>
-    //       <Tooltip content="Delete" isDisabled={isOverlay}>
-    //         <Button
-    //           color="danger"
-    //           className="rounded-full opacity-75"
-    //           size="sm"
-    //           isIconOnly={true}
-    //           onPress={() => onDelete?.(id, title)}
-    //         >
-    //           <FaTimes />
-    //         </Button>
-    //       </Tooltip>
-    //     </div>
-
-    //     <div className="flex flex-col gap-2">
-    //       <span className="text-lg">{title}</span> {/* text-nowrap truncate */}
-    //       <Divider className="bg-gray-300 dark:bg-neutral-800" />
-    //       <div className="text-sm text-gray-600 dark:text-neutral-400 ">
-    //         {description}
-    //       </div>
-    //     </div>
-    //   </div>
   );
 };
 

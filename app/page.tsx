@@ -1,9 +1,10 @@
+// page.tsx
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@heroui/button";
 import { Kbd } from "@heroui/kbd";
 import { FaPlus } from "react-icons/fa";
-import AddTask from "@/components/AddTaskModal";
+import TaskModal from "@/components/TaskModal";
 import Board from "@/components/Board";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -143,10 +144,11 @@ export default function Home() {
         perform the action.
       </div>
 
-      <AddTask
+      <TaskModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleAddTask}
+        mode="add"
       />
     </main>
   );
