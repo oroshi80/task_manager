@@ -28,6 +28,26 @@ interface EditTaskProps {
   isLoading: boolean;
 }
 
+// ✅ Move this OUTSIDE of your parent component (top-level in the file)
+interface ModalHeaderDBProps {
+  databaseType?: string;
+  task: {
+    id: string | number;
+    title: string;
+  };
+}
+
+const ModalHeaderDB: React.FC<ModalHeaderDBProps> = ({
+  databaseType,
+  task,
+}) => {
+  return (
+    <>
+      {databaseType === "mongoDB" ? `#${task.id} - ${task.title}` : task.title}
+    </>
+  );
+};
+
 const databaseType = process.env.DATABASE;
 
 export default function EditTask({
@@ -79,25 +99,12 @@ export default function EditTask({
 
   if (!isOpen || !task) return null; // Early return if task is null or modal is closed
 
-  //returning the Model Header with the mogoDB or no
-  const ModalHeaderDB = () => {
-    if (databaseType === "mongoDB") {
-      return (
-        <>
-          {databaseType === "mongoDB"
-            ? `#${task.id} - ${task.title}`
-            : task.title}
-        </>
-      );
-    } else {
-      return <>{task.title}</>;
-    }
-  };
-
   return (
     <Modal isOpen={isOpen} onOpenChange={onClose}>
       <ModalContent>
-        <ModalHeader>{ModalHeaderDB()}</ModalHeader>
+        <ModalHeader>
+          {<ModalHeaderDB databaseType={databaseType} task={task} />}
+        </ModalHeader>
         <ModalBody>
           <form onSubmit={handleSubmit(onFormSubmit)} id="task-form">
             <div className="flex flex-col gap-4">
