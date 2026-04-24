@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# devcontainer
+.devcontainer
+
 # next.js
 /.next/
 /out/
